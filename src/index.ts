@@ -60,7 +60,7 @@ async function monitorMongoDBChanges() {
         // Upsert (add/update) the document in Typesense
         try {
           await typesense
-            .collections("blogs")
+            .collections("contents")
             .documents()
             .upsert(typesenseDocument);
         } catch (error: any) {
@@ -73,7 +73,10 @@ async function monitorMongoDBChanges() {
 
         // Delete the document from Typesense
         try {
-          await typesense.collections("blogs").documents(documentId).delete();
+          await typesense
+            .collections("contents")
+            .documents(documentId)
+            .delete();
           console.log(`Document with ID ${documentId} deleted from Typesense.`);
         } catch (error) {
           console.error("Error deleting document from Typesense:", error);
