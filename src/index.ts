@@ -51,11 +51,14 @@ async function monitorMongoDBChanges() {
           title: changedDocument?.title,
           description: changedDocument?.description,
           titleId: changedDocument?.titleId,
-          author: changedDocument?.author,
+          category: changedDocument?.category,
+          createBy: changedDocument?.createBy,
+          createdAt: changedDocument?.createdAt,
+          updatedAt: changedDocument?.updatedAt,
         };
 
         // console.log("changedDocument", typesenseDocument);
-        console.log("changedDocument_id", typesenseDocument.id);
+        // console.log("changedDocument_id", typesenseDocument.id);
 
         // Upsert (add/update) the document in Typesense
         try {
@@ -63,6 +66,7 @@ async function monitorMongoDBChanges() {
             .collections("contents")
             .documents()
             .upsert(typesenseDocument);
+          console.log("changedDocument_id", typesenseDocument.id);
         } catch (error: any) {
           console.error("Error sending document to Typesense:", error.message);
         }
