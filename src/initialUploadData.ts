@@ -20,13 +20,13 @@ const client = new typesense.Client({
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017";
 
 const dbClient = new MongoClient(uri);
-
 const resetTypesenseData = async () => {
   console.log("Populating index in Typesense");
 
   const schema: any = {
     name: "contents",
     fields: [
+      { name: "id", type: "string" },
       { name: "title", type: "string", facet: true, infix: true, sort: true },
       { name: "description", type: "string", facet: true },
       { name: "titleId", type: "string", facet: true },
@@ -56,8 +56,23 @@ const resetTypesenseData = async () => {
     const collection = dbClient.db("test").collection("contents");
 
     const contents = await collection
-      .find({}, { projection: { _id: 0, __v: 0, content: 0 } })
+      .aggregate([
+        {
+          $project: {
+            id: "$_id", // Rename _id to id
+            _id: 0, // Exclude _id field
+            title: 1,
+            description: 1,
+            titleId: 1,
+            category: 1,
+            createBy: 1,
+            createdAt: 1,
+            updatedAt: 1,
+          },
+        },
+      ])
       .toArray();
+    console.log("contents", contents);
 
     console.log("Adding records: ");
     const returnData: any = await client
@@ -65,7 +80,7 @@ const resetTypesenseData = async () => {
       .documents()
       .import(contents);
 
-    console.log("Import Results successfully");
+    console.log("Import Results successfully", returnData);
 
     const failedItems = returnData.filter(
       (item: any) => item.success === false
